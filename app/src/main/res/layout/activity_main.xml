@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  严格还原截图：
-  - 背景 #1C1C1E（深灰黑）
-  - 顶部大标题"语音助手" + 副标题"抖音定制版"
-  - 白色圆角卡片（内含两个路径只读框）
-  - 红色大按钮"保存并启动悬浮窗"
-  - 淡色提示卡片（💡 操作提示）
-  - 底部小字"请确保已授予 Root 及悬浮窗权限"
--->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1E"
+    android:background="#0D0D0F"
     android:fillViewport="true"
     android:scrollbars="none">
 
@@ -20,157 +11,216 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:paddingLeft="18dp"
+        android:paddingRight="18dp"
         android:paddingBottom="40dp">
 
-        <!-- ── 顶部标题区 ── -->
+        <!-- ══ 顶部标题 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingTop="60dp"
-            android:paddingBottom="36dp">
+            android:paddingTop="52dp"
+            android:paddingBottom="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="语音助手"
+                android:text="🎙 语音助手"
                 android:textColor="#FFFFFF"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:letterSpacing="-0.02" />
+                android:textSize="30sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="抖音定制版"
                 android:textColor="#8E8E93"
-                android:textSize="15sp"
-                android:layout_marginTop="6dp" />
+                android:textSize="14sp"
+                android:layout_marginTop="5dp" />
         </LinearLayout>
 
-        <!-- ── 路径卡片 ── -->
+        <!-- ══ Root 状态 Badge ══ -->
+        <LinearLayout
+            android:id="@+id/root_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_badge_gray"
+            android:paddingLeft="18dp"
+            android:paddingRight="18dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/tv_root_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Root：检测中…"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- ══ 替换音频卡片 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginBottom="20dp">
+            android:padding="18dp"
+            android:layout_marginBottom="14dp">
 
-            <!-- 评论语音目录 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="替换音频"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btn_pick_audio"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="📂  选择音频文件"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:background="@drawable/bg_btn_blue"
+                android:stateListAnimator="@null" />
+
+            <TextView
+                android:id="@+id/tv_audio_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#4CAF50"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- ══ 目标路径设置卡片 ══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="18dp"
+            android:layout_marginBottom="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="目标路径设置"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="14dp" />
+
+            <!-- 评论路径 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="评论语音目录"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
+                android:textColor="#8E8E93"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp" />
 
-            <TextView
-                android:id="@+id/tv_comment_path"
+            <EditText
+                android:id="@+id/et_comment_path"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="/data/data/com.ss.android.ugc.aweme/files/comment/audio"
-                android:textColor="#EBEBF5"
-                android:textSize="13sp"
                 android:background="@drawable/bg_path_field"
-                android:padding="14dp"
+                android:padding="12dp"
+                android:textColor="#E5E5EA"
+                android:textSize="12sp"
                 android:fontFamily="monospace"
-                android:layout_marginBottom="20dp" />
+                android:singleLine="false"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:layout_marginBottom="16dp"
+                android:hint="/data/data/…/files/comment/audio"
+                android:hintTextColor="#636366" />
 
-            <!-- 私聊语音目录 -->
+            <!-- 私聊路径 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="私聊语音目录"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
+                android:textColor="#8E8E93"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp" />
 
-            <TextView
-                android:id="@+id/tv_im_path"
+            <EditText
+                android:id="@+id/et_im_path"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="/data/data/com.ss.android.ugc.aweme/files/im"
-                android:textColor="#EBEBF5"
-                android:textSize="13sp"
                 android:background="@drawable/bg_path_field"
-                android:padding="14dp"
-                android:fontFamily="monospace" />
-
+                android:padding="12dp"
+                android:textColor="#E5E5EA"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:singleLine="false"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:hint="/data/data/…/files/im"
+                android:hintTextColor="#636366" />
         </LinearLayout>
 
-        <!-- ── 保存并启动悬浮窗 ── -->
+        <!-- ══ 保存并启动 ══ -->
         <Button
             android:id="@+id/btn_save_start"
             android:layout_width="match_parent"
-            android:layout_height="58dp"
+            android:layout_height="56dp"
             android:text="保存并启动悬浮窗"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:background="@drawable/bg_btn_red"
             android:stateListAnimator="@null"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- ── 操作提示卡片 ── -->
+        <!-- ══ 操作提示 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginBottom="32dp">
+            android:padding="18dp"
+            android:layout_marginBottom="24dp">
 
-            <!-- 标题行 -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💡"
-                    android:textSize="18sp"
-                    android:layout_marginEnd="6dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="操作提示"
-                    android:textColor="#FF3B5C"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- 提示内容 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="在评论区或私聊录制1-30秒语音后不要发送\n点击悬浮窗切换对应模式并点击替换"
-                android:textColor="#EBEBF5"
+                android:text="💡  操作提示"
+                android:textColor="#FF3B5C"
                 android:textSize="14sp"
+                android:textStyle="bold"
                 android:gravity="center"
                 android:layout_gravity="center_horizontal"
-                android:lineSpacingExtra="4dp" />
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="① 主界面选择要替换的音频文件\n② 设置目标目录（默认已填入抖音路径）\n③ 点击「保存并启动悬浮窗」\n④ 去抖音评论区/私聊录制语音，不要发送\n⑤ 点击悬浮窗切换模式 → 点击「替换」"
+                android:textColor="#EBEBF5"
+                android:textSize="13sp"
+                android:lineSpacingExtra="5dp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="start" />
         </LinearLayout>
 
-        <!-- ── 底部提示 ── -->
+        <!-- ══ 底部说明 ══ -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="请确保已授予 Root 及悬浮窗权限"
+            android:text="需要 Root 权限 · 路径设置支持自定义"
             android:textColor="#48484A"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:gravity="center" />
 
     </LinearLayout>
