@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_app">#1C1C1E</color>
+    <color name="bg_card">#2C2C2E</color>
+    <color name="red_primary">#FF3B5C</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_secondary">#8E8E93</color>
+    <color name="text_dim">#48484A</color>
+    <color name="text_field_text">#EBEBF5</color>
+</resources>

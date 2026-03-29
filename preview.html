@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音助手 · 抖音定制版</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #0A0A0A;
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 40px 24px;
+  min-height: 100vh;
+  flex-wrap: wrap;
+  color: #fff;
+}
+
+/* ====== 手机壳 ====== */
+.device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.device-label {
+  color: #555;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.phone {
+  width: 375px;
+  background: #1C1C1E;
+  border-radius: 44px;
+  border: 3px solid #2C2C2E;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px #111,
+    0 30px 80px rgba(0,0,0,0.9),
+    0 0 40px rgba(255,59,92,0.08);
+  position: relative;
+}
+
+/* 状态栏 */
+.status-bar {
+  height: 44px;
+  background: #1C1C1E;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.status-right { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+
+/* 屏幕内容 */
+.screen {
+  background: #1C1C1E;
+  padding: 0 20px 40px;
+  min-height: 700px;
+}
+
+/* ── 标题区 ── */
+.header {
+  text-align: center;
+  padding: 48px 0 36px;
+}
+.title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+}
+.subtitle {
+  font-size: 16px;
+  color: #8E8E93;
+  margin-top: 6px;
+}
+
+/* ── 路径卡片 ── */
+.card {
+  background: #2C2C2E;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.path-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 10px;
+}
+.path-field {
+  background: #3A3A3C;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 13px;
+  color: #EBEBF5;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  line-height: 1.5;
+  word-break: break-all;
+  margin-bottom: 16px;
+  border: none;
+  width: 100%;
+  outline: none;
+  cursor: default;
+}
+.path-field:last-child { margin-bottom: 0; }
+
+/* ── 红色大按钮 ── */
+.btn-red {
+  width: 100%;
+  height: 58px;
+  background: #FF3B5C;
+  border: none;
+  border-radius: 14px;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-red:hover { background: #E02E4E; }
+.btn-red:active { transform: scale(0.98); background: #CC1A33; }
+
+/* ── 提示卡片 ── */
+.tip-card {
+  background: #2C2C2E;
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+  text-align: center;
+}
+.tip-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.tip-title-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FF3B5C;
+}
+.tip-body {
+  font-size: 14px;
+  color: #EBEBF5;
+  line-height: 1.8;
+}
+
+/* ── 底部注意 ── */
+.footer-note {
+  text-align: center;
+  font-size: 12px;
+  color: #48484A;
+  margin-top: 28px;
+}
+
+/* ====== 悬浮窗面板 ====== */
+.float-panel-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.float-panel {
+  background: rgba(10,10,10,0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 10px 8px 10px;
+  width: 82px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 24px rgba(255,59,92,0.15);
+  backdrop-filter: blur(20px);
+}
+.float-mode-tag {
+  width: 66px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.float-mode-tag:hover { opacity: 0.85; }
+.mode-comment { background: #FF3B5C; }
+.mode-im      { background: #1677FF; }
+
+.float-replace-btn {
+  width: 58px;
+  height: 58px;
+  background: #FF3B5C;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(255,59,92,0.5);
+  transition: transform 0.15s, background 0.15s;
+  letter-spacing: 0;
+}
+.float-replace-btn:hover { transform: scale(1.08); }
+.float-replace-btn:active { transform: scale(0.94); background: #CC1A33; }
+
+.float-actions {
+  display: flex;
+  gap: 6px;
+}
+.float-small-btn {
+  width: 32px;
+  height: 32px;
+  background: #3C3C3E;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.float-small-btn:hover { background: #505052; }
+
+/* ── 右侧说明 ── */
+.float-desc {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.desc-card {
+  background: #2C2C2E;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.desc-card h4 {
+  font-size: 13px;
+  color: #FF3B5C;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.desc-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 7px;
+}
+.desc-item:last-child { margin-bottom: 0; }
+.desc-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.desc-text { font-size: 12px; color: #ABABAB; line-height: 1.6; }
+.desc-text b { color: #E0E0E0; }
+
+/* 流程图 */
+.flow-card {
+  background: #2C2C2E;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.flow-card h4 { font-size: 13px; color: #8E8E93; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #3A3A3C;
+}
+.flow-step:last-child { border-bottom: none; }
+.step-num {
+  width: 24px;
+  height: 24px;
+  background: #FF3B5C;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-text { font-size: 12px; color: #C0C0C0; line-height: 1.5; }
+.step-text small { color: #666; font-size: 11px; }
+
+/* .so 说明 */
+.so-badge {
+  background: linear-gradient(135deg, #1C1C2E, #2C1C3E);
+  border: 1px solid #6B33CC40;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.so-badge h4 { font-size: 13px; color: #A855F7; margin-bottom: 8px; }
+.so-item { font-size: 12px; color: #999; margin-bottom: 4px; padding-left: 12px; position: relative; }
+.so-item::before { content: "›"; position: absolute; left: 0; color: #A855F7; }
+.so-item code { color: #C084FC; font-family: monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- ====== 主界面手机 ====== -->
+<div class="device">
+  <div class="device-label">主界面</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span>11:20</span>
+      <div class="status-right">
+        <span>4.50 KB/s</span>
+        <span>HD</span>
+        <span>5G</span>
+        <span>🔋69%</span>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="header">
+        <div class="title">语音助手</div>
+        <div class="subtitle">抖音定制版</div>
+      </div>
+
+      <!-- 路径卡片 -->
+      <div class="card">
+        <div class="path-label">评论语音目录</div>
+        <div class="path-field" id="commentPath">/data/data/com.ss.android.ugc.aweme/files/comment/audio</div>
+        <div class="path-label">私聊语音目录</div>
+        <div class="path-field" id="imPath">/data/data/com.ss.android.ugc.aweme/files/im</div>
+      </div>
+
+      <!-- 红色按钮 -->
+      <button class="btn-red" onclick="onSaveStart()">保存并启动悬浮窗</button>
+
+      <!-- 提示卡片 -->
+      <div class="tip-card">
+        <div class="tip-title">
+          <span style="font-size:18px">💡</span>
+          <span class="tip-title-text">操作提示</span>
+        </div>
+        <div class="tip-body">
+          在评论区或私聊录制1-30秒语音后不要发送<br>
+          点击悬浮窗切换对应模式并点击替换
+        </div>
+      </div>
+
+      <div class="footer-note">请确保已授予 Root 及悬浮窗权限</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 悬浮窗 + 说明 ====== -->
+<div style="display:flex;flex-direction:column;gap:24px;align-items:center;">
+  <div style="color:#555;font-size:12px;letter-spacing:2px;text-transform:uppercase;">悬浮窗（覆盖在抖音上方）</div>
+
+  <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
+
+    <!-- 悬浮窗模拟 -->
+    <div class="float-panel-wrap">
+      <!-- 模拟抖音背景 -->
+      <div style="
+        width:180px;height:320px;
+        background:linear-gradient(180deg,#0D1B2A 0%,#0A1929 100%);
+        border-radius:16px;border:2px solid #2C2C2E;
+        position:relative;overflow:hidden;
+        display:flex;align-items:flex-end;justify-content:center;
+        padding-bottom:16px;
+      ">
+        <div style="position:absolute;top:14px;left:0;right:0;text-align:center;color:#444;font-size:11px;">抖音（评论区）</div>
+        <div style="width:140px;height:34px;background:rgba(255,255,255,0.07);border-radius:17px;display:flex;align-items:center;padding:0 12px;color:#555;font-size:12px;">说点什么...</div>
+
+        <!-- 悬浮窗 -->
+        <div class="float-panel" style="position:absolute;top:50px;right:10px;">
+          <div class="float-mode-tag mode-comment" id="floatTag" onclick="switchMode()">评论</div>
+          <div class="float-replace-btn" id="replaceBtnCircle" onclick="doReplace()">替换</div>
+          <div class="float-actions">
+            <div class="float-small-btn" onclick="switchMode()" title="切换模式">切</div>
+            <div class="float-small-btn" onclick="closeFW()" title="关闭">✕</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:#555;text-align:center;max-width:180px;line-height:1.6;">
+        长按可拖动位置<br>点击「切」切换评论/私聊模式
+      </div>
+    </div>
+
+    <!-- 右侧说明卡片 -->
+    <div class="float-desc">
+
+      <!-- .so 保护说明 -->
+      <div class="so-badge">
+        <h4>🔒 核心配置保护（.so 层）</h4>
+        <div class="so-item">路径配置以字节编码存入 <code>libvoiceconfig.so</code></div>
+        <div class="so-item">Java 层无明文路径字符串，防止 APK 直接反编译</div>
+        <div class="so-item">文件替换命令全程在 native 层执行</div>
+        <div class="so-item">目录扫描由 <code>findLatestFile()</code> native 完成</div>
+        <div class="so-item">Release 编译开启 <code>-O2 -fvisibility=hidden</code></div>
+      </div>
+
+      <!-- 功能说明 -->
+      <div class="desc-card">
+        <h4>悬浮窗功能</h4>
+        <div class="desc-item">
+          <div class="desc-icon">🔴</div>
+          <div class="desc-text"><b>替换</b> — Root 覆盖抖音最新录音文件</div>
+        </div>
+        <div class="desc-item">
+          <div class="desc-icon">⇄</div>
+          <div class="desc-text"><b>切</b> — 在评论/私聊模式间切换，对应不同目录</div>
+        </div>
+        <div class="desc-item">
+          <div class="desc-icon">✕</div>
+          <div class="desc-text"><b>关闭</b> — 停止悬浮窗服务</div>
+        </div>
+      </div>
+
+      <!-- 使用流程 -->
+      <div class="flow-card">
+        <h4>使用流程</h4>
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-text">点击「保存并启动悬浮窗」</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-text">自动跳转抖音，在评论区或私聊录制语音<br><small>（录完不要点发送）</small></div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-text">点悬浮窗「切」切换对应模式</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-text">点「替换」→ Root 覆盖语音文件</div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
+          <div class="step-text" style="color:#4CAF50;">✓ 发送语音，对方收到替换内容</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let floatMode = 'comment';
+let fwVisible = true;
+
+function onSaveStart() {
+  // 模拟启动
+  const btn = document.querySelector('.btn-red');
+  btn.textContent = '✓ 悬浮窗已启动';
+  btn.style.background = '#2D6A4F';
+  setTimeout(() => {
+    btn.textContent = '保存并启动悬浮窗';
+    btn.style.background = '';
+  }, 2000);
+  if (!fwVisible) {
+    document.querySelector('.float-panel').style.display = 'flex';
+    fwVisible = true;
+  }
+}
+
+function switchMode() {
+  const tag = document.getElementById('floatTag');
+  if (floatMode === 'comment') {
+    floatMode = 'im';
+    tag.textContent = '私聊';
+    tag.className = 'float-mode-tag mode-im';
+  } else {
+    floatMode = 'comment';
+    tag.textContent = '评论';
+    tag.className = 'float-mode-tag mode-comment';
+  }
+}
+
+function doReplace() {
+  const btn = document.getElementById('replaceBtnCircle');
+  btn.textContent = '✓';
+  btn.style.background = '#2D6A4F';
+  btn.style.boxShadow = '0 0 20px rgba(45,106,79,0.5)';
+  setTimeout(() => {
+    btn.textContent = '替换';
+    btn.style.background = '#FF3B5C';
+    btn.style.boxShadow = '0 0 20px rgba(255,59,92,0.5)';
+  }, 1500);
+}
+
+function closeFW() {
+  document.querySelector('.float-panel').style.display = 'none';
+  fwVisible = false;
+}
+</script>
+</body>
+</html>
