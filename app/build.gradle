@@ -12,27 +12,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
-
-        // NDK ABI 过滤（只打包常见架构，减小体积）
-        ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
-        }
-
-        // 指向 CMakeLists.txt
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++17 -O2"
-                arguments "-DANDROID_STL=c++_shared"
-            }
-        }
-    }
-
-    // NDK 外部构建配置
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.22.1"
-        }
     }
 
     // ── 签名配置：优先读取环境变量（CI），本地回退到 debug ──
@@ -62,7 +41,7 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            jniDebuggable true
+            // debug 签名
         }
     }
 

@@ -1,4 +1,4 @@
-name: 🔨 Build & Release APK
+name: 🔨 Build APK
 
 on:
   push:
@@ -7,16 +7,14 @@ on:
       - 'v*'
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:          # 支持手动触发
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: '17'
-  NDK_VERSION:  '25.2.9519653'
-  CMAKE_VERSION: '3.22.1'
 
 jobs:
   # ─────────────────────────────────────────────
-  # Stage 1：编译 Debug APK（每次 push 都跑）
+  # 编译 Debug APK
   # ─────────────────────────────────────────────
   build-debug:
     name: 🛠 Build Debug APK
@@ -32,15 +30,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: gradle
-
-      - name: 📦 安装 NDK & CMake
-        run: |
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "ndk;${{ env.NDK_VERSION }}" \
-            "cmake;${{ env.CMAKE_VERSION }}" \
-            --sdk_root=$ANDROID_SDK_ROOT
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: 🔑 赋予 Gradle 执行权限
         working-directory: DouyinVoiceApp
@@ -58,24 +47,21 @@ jobs:
 
       - name: 🏗 编译 Debug APK
         working-directory: DouyinVoiceApp
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: ./gradlew assembleDebug --no-daemon
 
-      - name: 📤 上传 Debug APK Artifact
+      - name: 📤 上传 Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk-${{ github.run_number }}
           path: DouyinVoiceApp/app/build/outputs/apk/debug/*.apk
-          retention-days: 7
 
   # ─────────────────────────────────────────────
-  # Stage 2：编译签名 Release APK（仅 tag 触发）
+  # 编译签名 Release APK（仅 tag 触发）
   # ─────────────────────────────────────────────
   build-release:
     name: 🚀 Build Signed Release APK
     runs-on: ubuntu-latest
-    needs: build-debug                 # 必须 Debug 通过后才签 Release
+    needs: build-debug
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
@@ -88,15 +74,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: gradle
-
-      - name: 📦 安装 NDK & CMake
-        run: |
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "ndk;${{ env.NDK_VERSION }}" \
-            "cmake;${{ env.CMAKE_VERSION }}" \
-            --sdk_root=$ANDROID_SDK_ROOT
-        env:
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: 🔑 赋予 Gradle 执行权限
         working-directory: DouyinVoiceApp
@@ -112,52 +89,43 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      # 从 GitHub Secrets 还原 keystore
       - name: 🔐 还原签名 Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > DouyinVoiceApp/app/release.jks
 
-      - name: 🏗 编译 Release APK（签名）
+      - name: 🏗 编译 Release APK
         working-directory: DouyinVoiceApp
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        run: ./gradlew assembleRelease --no-daemon
         env:
-          ANDROID_SDK_ROOT:        /usr/local/lib/android/sdk
           KEYSTORE_FILE:           release.jks
           KEYSTORE_PASSWORD:       ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS:               ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD:            ${{ secrets.KEY_PASSWORD }}
+          KEY_PASSWORD:           ${{ secrets.KEY_PASSWORD }}
 
-      - name: 🧹 删除 Keystore（安全清理）
+      - name: 🧹 删除 Keystore
         if: always()
         run: rm -f DouyinVoiceApp/app/release.jks
 
-      - name: 📤 上传 Release APK Artifact
+      - name: 📤 上传 Release APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk-${{ github.ref_name }}
           path: DouyinVoiceApp/app/build/outputs/apk/release/*.apk
-          retention-days: 30
 
-      # ─── 自动发布 GitHub Release ───────────────
       - name: 🏷 创建 GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: "抖音语音助手 ${{ github.ref_name }}"
           body: |
-            ## 📦 抖音语音替换助手 ${{ github.ref_name }}
+            ## 📦 抖音语音替换助手
 
             ### 安装说明
             1. 设备需要已 Root（推荐 Magisk）
             2. 安装 APK 并授予 Root / 悬浮窗权限
             3. 启动 APP → 选择替换音频 → 保存并启动悬浮窗
             4. 打开抖音，录制语音后**不要发送**，点击悬浮窗替换即可
-
-            ### 变更记录
-            ${{ github.event.head_commit.message }}
           files: |
             DouyinVoiceApp/app/build/outputs/apk/release/*.apk
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
