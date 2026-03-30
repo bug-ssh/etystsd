@@ -1,4 +1,4 @@
-name: 🔨 Build APK
+name: Build APK
 
 on:
   push:
@@ -11,30 +11,36 @@ on:
 
 env:
   JAVA_VERSION: '17'
+  NDK_VERSION:  '25.2.9519653'
 
 jobs:
   build-debug:
-    name: 🛠 Build Debug APK
+    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ☕ 设置 JDK
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: gradle
 
-      - name: 🤖 安装 Android SDK
-        uses: android-actions/setup-android@v2
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: 🔑 赋予 Gradle 执行权限
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager --install "ndk;${{ env.NDK_VERSION }}" "cmake;3.22.1"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Grant Gradle execute permission
         run: chmod +x gradlew
 
-      - name: 🗂 Gradle 缓存
+      - name: Gradle cache
         uses: actions/cache@v4
         with:
           path: |
@@ -44,39 +50,46 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: 🏗 编译 Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
-      - name: 📤 上传 Debug APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
 
   build-release:
-    name: 🚀 Build Signed Release APK
+    name: Build Signed Release APK
     runs-on: ubuntu-latest
     needs: build-debug
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: 📥 Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ☕ 设置 JDK
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: gradle
 
-      - name: 🤖 安装 Android SDK
-        uses: android-actions/setup-android@v2
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: 🔑 赋予 Gradle 执行权限
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager --install "ndk;${{ env.NDK_VERSION }}" "cmake;3.22.1"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Grant Gradle execute permission
         run: chmod +x gradlew
 
-      - name: 🗂 Gradle 缓存
+      - name: Gradle cache
         uses: actions/cache@v4
         with:
           path: |
@@ -86,42 +99,43 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: 🔐 还原签名 Keystore
+      - name: Restore signing Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.jks
 
-      - name: 🏗 编译 Release APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
         env:
+          ANDROID_NDK_HOME:  ${{ env.ANDROID_NDK_HOME }}
           KEYSTORE_FILE:     release.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS:        ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD:     ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS:         ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
 
-      - name: 🧹 删除 Keystore
+      - name: Cleanup Keystore
         if: always()
         run: rm -f app/release.jks
 
-      - name: 📤 上传 Release APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: app/build/outputs/apk/release/*.apk
 
-      - name: 🏷 创建 GitHub Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "抖音语音助手 ${{ github.ref_name }}"
+          name: "Voice Assistant ${{ github.ref_name }}"
           body: |
-            ## 📦 抖音语音替换助手
+            ## Voice Assistant - Douyin Custom Edition
 
-            ### 安装说明
-            1. 设备需要已 Root（推荐 Magisk）
-            2. 安装 APK 并授予 Root / 悬浮窗权限
-            3. 启动 APP → 选择替换音频 → 保存并启动悬浮窗
-            4. 打开抖音，录制语音后**不要发送**，点击悬浮窗替换即可
-          files: |
-            app/build/outputs/apk/release/*.apk
+            ### Install Instructions
+            1. Device must be rooted (Magisk recommended)
+            2. Install APK, grant Root + Overlay permissions
+            3. Select replacement audio, confirm target paths
+            4. Tap "Save & Start Float Window"
+            5. Open Douyin, record voice (don't send) -> tap Replace on float
+          files: app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

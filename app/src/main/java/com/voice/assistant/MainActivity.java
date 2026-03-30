@@ -4,15 +4,20 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,82 +29,160 @@ import java.io.OutputStream;
 
 public class MainActivity extends Activity {
 
-    private static final int REQ_PICK_AUDIO = 2001;
-    private static final int REQ_OVERLAY    = 2002;
+    private static final int REQ_PICK_AUDIO   = 2001;
+    private static final int REQ_OVERLAY      = 2002;
+    private static final int REQ_BROWSE_FILE  = 2003;
+    private static final int REQ_PICK_BG      = 2004;
 
-    // Root 状态
+    // Root status
     private View     rootBadge;
     private TextView tvRootStatus;
 
-    // 音频选择
+    // Audio selection
     private TextView tvAudioName;
     private Button   btnPickAudio;
 
-    // 路径设置
+    // Path settings
     private EditText etCommentPath;
     private EditText etImPath;
 
-    // 启动
+    // Target file
+    private TextView tvTargetFile;
+    private Button   btnBrowseFile;
+
+    // Launch
     private Button btnSaveStart;
+
+    // Settings
+    private Button btnSetBg;
+    private Button btnFontSmall;
+    private Button btnFontMedium;
+    private Button btnFontLarge;
+
+    // Root layout for background
+    private ScrollView scrollRoot;
+
+    // Font size multipliers
+    private static final float[] FONT_SCALES = {0.85f, 1.0f, 1.2f};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        scrollRoot    = findViewById(R.id.scroll_root);
         rootBadge     = findViewById(R.id.root_badge);
         tvRootStatus  = findViewById(R.id.tv_root_status);
         tvAudioName   = findViewById(R.id.tv_audio_name);
         btnPickAudio  = findViewById(R.id.btn_pick_audio);
         etCommentPath = findViewById(R.id.et_comment_path);
         etImPath      = findViewById(R.id.et_im_path);
+        tvTargetFile  = findViewById(R.id.tv_target_file);
+        btnBrowseFile = findViewById(R.id.btn_browse_file);
         btnSaveStart  = findViewById(R.id.btn_save_start);
+        btnSetBg      = findViewById(R.id.btn_set_bg);
+        btnFontSmall  = findViewById(R.id.btn_font_small);
+        btnFontMedium = findViewById(R.id.btn_font_medium);
+        btnFontLarge  = findViewById(R.id.btn_font_large);
 
-        // 初始化路径（优先 SharedPreferences，其次 .so 默认值）
+        // Initialize paths
         etCommentPath.setText(NativeConfig.getCommentPath(this));
         etImPath.setText(NativeConfig.getImPath(this));
 
-        // 恢复已选音频名
+        // Restore selected audio name
         String savedName = NativeConfig.getSavedAudioName(this);
         if (!TextUtils.isEmpty(savedName)) {
-            tvAudioName.setText("📄 " + savedName);
+            tvAudioName.setText(savedName);
             tvAudioName.setVisibility(View.VISIBLE);
         }
 
-        // 异步检测 Root
+        // Restore target file
+        String targetFile = NativeConfig.getTargetFile(this);
+        if (!TextUtils.isEmpty(targetFile)) {
+            tvTargetFile.setText(targetFile);
+            tvTargetFile.setVisibility(View.VISIBLE);
+        }
+
+        // Load custom background
+        loadCustomBackground();
+
+        // Apply saved font size
+        applyFontSize(NativeConfig.getFontSize(this));
+
+        // Detect Root async
         detectRoot();
 
+        // Listeners
         btnPickAudio.setOnClickListener(v -> openFilePicker());
         btnSaveStart.setOnClickListener(v -> onSaveStart());
+        btnBrowseFile.setOnClickListener(v -> openRootFileBrowser());
+        btnSetBg.setOnClickListener(v -> pickBackground());
+
+        btnFontSmall.setOnClickListener(v -> {
+            NativeConfig.saveFontSize(this, NativeConfig.FONT_SMALL);
+            applyFontSize(NativeConfig.FONT_SMALL);
+            toast("Font: Small");
+        });
+        btnFontMedium.setOnClickListener(v -> {
+            NativeConfig.saveFontSize(this, NativeConfig.FONT_MEDIUM);
+            applyFontSize(NativeConfig.FONT_MEDIUM);
+            toast("Font: Medium");
+        });
+        btnFontLarge.setOnClickListener(v -> {
+            NativeConfig.saveFontSize(this, NativeConfig.FONT_LARGE);
+            applyFontSize(NativeConfig.FONT_LARGE);
+            toast("Font: Large");
+        });
     }
 
-    // ── Root 检测 ────────────────────────────────────────
+    // ── Root Detection ──────────────────────────────────
 
     private void detectRoot() {
-        tvRootStatus.setText("Root：检测中…");
+        tvRootStatus.setText("Root: detecting...");
         rootBadge.setBackgroundResource(R.drawable.bg_badge_gray);
 
         new Thread(() -> {
             final boolean rooted = NativeConfig.checkRoot();
             runOnUiThread(() -> {
                 if (rooted) {
-                    tvRootStatus.setText("✓  Root 已获取");
+                    tvRootStatus.setText("Root: granted");
                     rootBadge.setBackgroundResource(R.drawable.bg_badge_green);
                 } else {
-                    tvRootStatus.setText("✗  未获取 Root");
+                    tvRootStatus.setText("Root: not available");
                     rootBadge.setBackgroundResource(R.drawable.bg_badge_red);
                 }
             });
         }).start();
     }
 
-    // ── 文件选择 ─────────────────────────────────────────
+    // ── Audio File Picker ───────────────────────────────
 
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(Intent.createChooser(intent, "选择替换音频"), REQ_PICK_AUDIO);
+        startActivityForResult(Intent.createChooser(intent, "Select replacement audio"), REQ_PICK_AUDIO);
+    }
+
+    // ── Root File Browser ───────────────────────────────
+
+    private void openRootFileBrowser() {
+        String dir = etCommentPath.getText().toString().trim();
+        if (TextUtils.isEmpty(dir)) {
+            dir = NativeConfig.getDefaultCommentPath();
+        }
+        Intent intent = new Intent(this, FileBrowserActivity.class);
+        intent.putExtra(FileBrowserActivity.EXTRA_INITIAL_DIR, dir);
+        startActivityForResult(intent, REQ_BROWSE_FILE);
+    }
+
+    // ── Background Picker ───────────────────────────────
+
+    private void pickBackground() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Select background image"), REQ_PICK_BG);
     }
 
     @Override
@@ -107,64 +190,106 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQ_PICK_AUDIO && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                String name = queryFileName(uri);
-                if (TextUtils.isEmpty(name)) name = "selected_audio";
+            handleAudioPicked(data);
+        }
 
-                // 持久化 URI 权限
-                try {
-                    getContentResolver().takePersistableUriPermission(
-                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                } catch (SecurityException ignore) {}
-
-                // 拷贝到缓存，保证后台服务可读
-                if (copyToCache(uri, name)) {
-                    NativeConfig.saveAudioInfo(this, uri.toString(), name);
-                    tvAudioName.setText("📄 " + name);
-                    tvAudioName.setVisibility(View.VISIBLE);
-                    Toast.makeText(this, "音频已选择 ✓", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "文件读取失败，请重试", Toast.LENGTH_SHORT).show();
-                }
+        if (requestCode == REQ_BROWSE_FILE && resultCode == RESULT_OK && data != null) {
+            String path = data.getStringExtra(FileBrowserActivity.EXTRA_SELECTED_PATH);
+            if (!TextUtils.isEmpty(path)) {
+                NativeConfig.saveTargetFile(this, path);
+                tvTargetFile.setText(path);
+                tvTargetFile.setVisibility(View.VISIBLE);
+                toast("Target file set");
             }
+        }
+
+        if (requestCode == REQ_PICK_BG && resultCode == RESULT_OK && data != null) {
+            handleBackgroundPicked(data);
         }
 
         if (requestCode == REQ_OVERLAY) {
             if (Settings.canDrawOverlays(this)) {
                 startFloatService();
             } else {
-                Toast.makeText(this, "悬浮窗权限未授予，无法启动", Toast.LENGTH_LONG).show();
+                toast("Overlay permission not granted");
             }
         }
     }
 
-    // ── 保存并启动 ────────────────────────────────────────
+    private void handleAudioPicked(Intent data) {
+        Uri uri = data.getData();
+        if (uri == null) return;
+
+        String name = queryFileName(uri);
+        if (TextUtils.isEmpty(name)) name = "selected_audio";
+
+        try {
+            getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException ignore) {}
+
+        if (copyToCache(uri, name)) {
+            NativeConfig.saveAudioInfo(this, uri.toString(), name);
+            tvAudioName.setText(name);
+            tvAudioName.setVisibility(View.VISIBLE);
+            toast("Audio selected");
+        } else {
+            toast("Failed to read file, please retry");
+        }
+    }
+
+    private void handleBackgroundPicked(Intent data) {
+        Uri uri = data.getData();
+        if (uri == null) return;
+
+        try {
+            getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException ignore) {}
+
+        // Copy background to cache
+        try (InputStream in = getContentResolver().openInputStream(uri)) {
+            if (in == null) { toast("Failed to read image"); return; }
+            File bgFile = new File(getCacheDir(), "custom_bg.jpg");
+            try (OutputStream out = new FileOutputStream(bgFile)) {
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) != -1) out.write(buf, 0, len);
+            }
+            NativeConfig.saveBackgroundUri(this, bgFile.getAbsolutePath());
+            loadCustomBackground();
+            toast("Background set");
+        } catch (IOException e) {
+            toast("Failed to set background");
+        }
+    }
+
+    // ── Save & Start ────────────────────────────────────
 
     private void onSaveStart() {
         String commentPath = etCommentPath.getText().toString().trim();
         String imPath      = etImPath.getText().toString().trim();
 
         if (TextUtils.isEmpty(commentPath) || TextUtils.isEmpty(imPath)) {
-            Toast.makeText(this, "路径不能为空", Toast.LENGTH_SHORT).show();
+            toast("Paths cannot be empty");
             return;
         }
 
         if (NativeConfig.getSavedAudioName(this) == null) {
-            Toast.makeText(this, "请先选择替换音频文件", Toast.LENGTH_SHORT).show();
+            toast("Please select replacement audio first");
             return;
         }
 
-        // 保存自定义路径
+        // Save custom paths
         NativeConfig.saveCustomPaths(this, commentPath, imPath);
 
-        // 申请悬浮窗权限
+        // Request overlay permission
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, REQ_OVERLAY);
-            Toast.makeText(this, "请授予悬浮窗权限后返回", Toast.LENGTH_LONG).show();
+            toast("Please grant overlay permission");
             return;
         }
 
@@ -173,9 +298,9 @@ public class MainActivity extends Activity {
 
     private void startFloatService() {
         startService(new Intent(this, FloatWindowService.class));
-        Toast.makeText(this, "悬浮窗已启动", Toast.LENGTH_SHORT).show();
+        toast("Float window started");
 
-        // 尝试跳转抖音
+        // Try to launch Douyin
         try {
             String pkg = NativeConfig.getDouyinPackage();
             Intent launch = getPackageManager().getLaunchIntentForPackage(pkg);
@@ -183,9 +308,68 @@ public class MainActivity extends Activity {
         } catch (Exception ignore) {}
     }
 
-    // ── 工具方法 ─────────────────────────────────────────
+    // ── Font Size ───────────────────────────────────────
 
-    /** 查询文件名 */
+    private void applyFontSize(int sizePreset) {
+        float scale = FONT_SCALES[Math.min(sizePreset, FONT_SCALES.length - 1)];
+        applyFontScaleRecursive(scrollRoot, scale);
+
+        // Update button states
+        int activeColor = 0xFFFF3B5C;
+        int inactiveColor = 0xFF3A3A3C;
+        if (btnFontSmall != null) btnFontSmall.setBackgroundColor(sizePreset == 0 ? activeColor : inactiveColor);
+        if (btnFontMedium != null) btnFontMedium.setBackgroundColor(sizePreset == 1 ? activeColor : inactiveColor);
+        if (btnFontLarge != null) btnFontLarge.setBackgroundColor(sizePreset == 2 ? activeColor : inactiveColor);
+    }
+
+    private void applyFontScaleRecursive(View v, float scale) {
+        if (v instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) v;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                applyFontScaleRecursive(vg.getChildAt(i), scale);
+            }
+        }
+        if (v instanceof TextView && !(v instanceof EditText) && !(v instanceof Button)) {
+            TextView tv = (TextView) v;
+            // Store original size in tag on first call
+            Object tag = tv.getTag(R.id.scroll_root);
+            float baseSize;
+            if (tag instanceof Float) {
+                baseSize = (Float) tag;
+            } else {
+                baseSize = tv.getTextSize() / getResources().getDisplayMetrics().scaledDensity;
+                tv.setTag(R.id.scroll_root, baseSize);
+            }
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, baseSize * scale);
+        }
+    }
+
+    // ── Custom Background ───────────────────────────────
+
+    private void loadCustomBackground() {
+        String bgPath = NativeConfig.getBackgroundUri(this);
+        if (!TextUtils.isEmpty(bgPath)) {
+            File bgFile = new File(bgPath);
+            if (bgFile.exists()) {
+                try {
+                    Bitmap bmp = BitmapFactory.decodeFile(bgPath);
+                    if (bmp != null && scrollRoot != null) {
+                        BitmapDrawable drawable = new BitmapDrawable(getResources(), bmp);
+                        drawable.setAlpha(60); // Semi-transparent overlay
+                        scrollRoot.setBackground(drawable);
+                        return;
+                    }
+                } catch (Exception ignore) {}
+            }
+        }
+        // Default background
+        if (scrollRoot != null) {
+            scrollRoot.setBackgroundColor(0xFF0D0D0F);
+        }
+    }
+
+    // ── Utility Methods ─────────────────────────────────
+
     private String queryFileName(Uri uri) {
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             try (Cursor c = getContentResolver().query(
@@ -204,14 +388,11 @@ public class MainActivity extends Activity {
         return null;
     }
 
-    /** 将选中的音频拷贝至私有缓存（供 FloatWindowService 读取）*/
     private boolean copyToCache(Uri uri, String name) {
-        // 清除旧缓存
         File cacheDir = getCacheDir();
         File[] old = cacheDir.listFiles(f -> f.getName().startsWith("replace_audio"));
         if (old != null) for (File f : old) f.delete();
 
-        // 保留扩展名
         String ext = ".amr";
         String lower = name.toLowerCase();
         if (lower.endsWith(".opus")) ext = ".opus";
@@ -233,5 +414,9 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

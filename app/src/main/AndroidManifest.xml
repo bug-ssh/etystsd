@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 悬浮窗权限 -->
+    <!-- Overlay permission -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <!-- 前台服务 -->
+    <!-- Foreground service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- Android 14+ 前台服务类型 -->
+    <!-- Android 14+ foreground service type -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <!-- 读取媒体音频（Android 13+） -->
+    <!-- Read media audio (Android 13+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <!-- 读取外部存储（Android 12 及以下） -->
+    <!-- Read media images (Android 13+) for background -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Read external storage (Android 12 and below) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Vibration feedback -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Post notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="false"
@@ -21,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- 主界面 -->
+        <!-- Main activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -33,20 +39,27 @@
             </intent-filter>
         </activity>
 
-        <!-- 透明文件选择器 Activity -->
+        <!-- Transparent audio picker Activity -->
         <activity
             android:name=".AudioPickerActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <!-- 悬浮窗服务 -->
+        <!-- Root file browser Activity -->
+        <activity
+            android:name=".FileBrowserActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+
+        <!-- Float window service -->
         <service
             android:name=".FloatWindowService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="悬浮窗覆盖服务" />
+                android:value="Float window overlay service" />
         </service>
 
     </application>
