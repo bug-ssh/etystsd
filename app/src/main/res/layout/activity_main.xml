@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0D0D0F"
@@ -16,7 +15,7 @@
         android:paddingRight="18dp"
         android:paddingBottom="40dp">
 
-        <!-- ══ Top Title ══ -->
+        <!-- ══ 顶部标题 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,21 +27,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Voice Assistant"
+                android:text="🎙 语音助手"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="30sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Douyin Custom Edition"
+                android:text="抖音定制版"
                 android:textColor="#8E8E93"
                 android:textSize="14sp"
                 android:layout_marginTop="5dp" />
         </LinearLayout>
 
-        <!-- ══ Root Status Badge ══ -->
+        <!-- ══ Root 状态 Badge ══ -->
         <LinearLayout
             android:id="@+id/root_badge"
             android:layout_width="wrap_content"
@@ -59,13 +58,13 @@
                 android:id="@+id/tv_root_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Root: detecting..."
+                android:text="Root：检测中…"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- ══ Replacement Audio Card ══ -->
+        <!-- ══ 替换音频卡片 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,7 +76,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Replacement Audio"
+                android:text="替换音频"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:textStyle="bold"
@@ -87,7 +86,7 @@
                 android:id="@+id/btn_pick_audio"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="Select Audio File"
+                android:text="📂  选择音频文件"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:background="@drawable/bg_btn_blue"
@@ -105,7 +104,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- ══ Target Path Settings Card ══ -->
+        <!-- ══ 目标路径设置卡片 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,17 +116,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Target Path Settings"
+                android:text="目标路径设置"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="14dp" />
 
-            <!-- Comment path -->
+            <!-- 评论路径 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Comment Voice Directory"
+                android:text="评论语音目录"
                 android:textColor="#8E8E93"
                 android:textSize="12sp"
                 android:layout_marginBottom="6dp" />
@@ -144,14 +143,14 @@
                 android:singleLine="false"
                 android:inputType="textMultiLine|textNoSuggestions"
                 android:layout_marginBottom="16dp"
-                android:hint="/data/data/.../files/comment/audio"
-                android:textColorHint="#636366" />
+                android:hint="/data/data/…/files/comment/audio"
+                android:hintTextColor="#636366" />
 
-            <!-- IM path -->
+            <!-- 私聊路径 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IM Voice Directory"
+                android:text="私聊语音目录"
                 android:textColor="#8E8E93"
                 android:textSize="12sp"
                 android:layout_marginBottom="6dp" />
@@ -167,64 +166,16 @@
                 android:fontFamily="monospace"
                 android:singleLine="false"
                 android:inputType="textMultiLine|textNoSuggestions"
-                android:hint="/data/data/.../files/im"
-                android:textColorHint="#636366" />
+                android:hint="/data/data/…/files/im"
+                android:hintTextColor="#636366" />
         </LinearLayout>
 
-        <!-- ══ File Browser Card ══ -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="18dp"
-            android:layout_marginBottom="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Target File (Optional)"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="6dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Browse to select specific voice file to overwrite"
-                android:textColor="#8E8E93"
-                android:textSize="11sp"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btn_browse_file"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:text="Browse Root Files"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:background="@drawable/bg_btn_blue"
-                android:stateListAnimator="@null" />
-
-            <TextView
-                android:id="@+id/tv_target_file"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#FF9800"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
-                android:layout_marginTop="10dp"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <!-- ══ Save & Start ══ -->
+        <!-- ══ 保存并启动 ══ -->
         <Button
             android:id="@+id/btn_save_start"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Save &amp; Start Float Window"
+            android:text="保存并启动悬浮窗"
             android:textColor="#FFFFFF"
             android:textSize="17sp"
             android:textStyle="bold"
@@ -232,89 +183,7 @@
             android:stateListAnimator="@null"
             android:layout_marginBottom="16dp" />
 
-        <!-- ══ Appearance Settings Card ══ -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="18dp"
-            android:layout_marginBottom="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Appearance"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="14dp" />
-
-            <!-- Background -->
-            <Button
-                android:id="@+id/btn_set_bg"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:text="Set Background Image"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:background="@drawable/bg_btn_blue"
-                android:stateListAnimator="@null"
-                android:layout_marginBottom="14dp" />
-
-            <!-- Font size -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Font Size"
-                android:textColor="#8E8E93"
-                android:textSize="12sp"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/btn_font_small"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="40dp"
-                    android:text="S"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:background="#3A3A3C"
-                    android:stateListAnimator="@null"
-                    android:layout_marginEnd="6dp" />
-
-                <Button
-                    android:id="@+id/btn_font_medium"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="40dp"
-                    android:text="M"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:background="#FF3B5C"
-                    android:stateListAnimator="@null"
-                    android:layout_marginEnd="6dp" />
-
-                <Button
-                    android:id="@+id/btn_font_large"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="40dp"
-                    android:text="L"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:background="#3A3A3C"
-                    android:stateListAnimator="@null" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ══ Usage Tips ══ -->
+        <!-- ══ 操作提示 ══ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -326,7 +195,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Usage Tips"
+                android:text="💡  操作提示"
                 android:textColor="#FF3B5C"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -337,7 +206,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1. Select replacement audio file\n2. Set target directories (defaults pre-filled)\n3. (Optional) Browse to pick specific target file\n4. Tap Save &amp; Start Float Window\n5. Go to Douyin, record 1-30s voice, DON'T send\n6. Tap float window to switch mode, tap Replace\n7. Long-press Replace to change audio on the fly\n8. Long-press Close to collapse/expand float"
+                android:text="① 主界面选择要替换的音频文件\n② 设置目标目录（默认已填入抖音路径）\n③ 点击「保存并启动悬浮窗」\n④ 去抖音评论区/私聊录制语音，不要发送\n⑤ 点击悬浮窗切换模式 → 点击「替换」"
                 android:textColor="#EBEBF5"
                 android:textSize="13sp"
                 android:lineSpacingExtra="5dp"
@@ -345,11 +214,11 @@
                 android:gravity="start" />
         </LinearLayout>
 
-        <!-- ══ Footer ══ -->
+        <!-- ══ 底部说明 ══ -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Requires Root permission"
+            android:text="需要 Root 权限 · 路径设置支持自定义"
             android:textColor="#48484A"
             android:textSize="11sp"
             android:gravity="center" />

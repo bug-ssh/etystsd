@@ -1,14 +1,12 @@
-# Proguard rules
+# Proguard 混淆规则
 
-# Keep JNI interface (native methods must not be obfuscated)
+# 保留 JNI 接口，不能混淆（否则 native 方法找不到）
 -keep class com.voice.assistant.NativeConfig { *; }
 
-# Keep Activity/Service names (system needs them)
+# 保留 Activity/Service 名（系统需要）
 -keep class com.voice.assistant.MainActivity { *; }
 -keep class com.voice.assistant.FloatWindowService { *; }
 -keep class com.voice.assistant.AudioPickerActivity { *; }
--keep class com.voice.assistant.FileBrowserActivity { *; }
--keep class com.voice.assistant.RootReplacer { *; }
 
-# General
+# 通用
 -dontwarn **
